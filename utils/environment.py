@@ -59,7 +59,7 @@ class env_tree():
         self.root = root_name
     
     def insert_root(self , parent_name):
-        
+        ### add a new root connect old root ###
         parent_key = parent_name
         old_root = self.root
         
@@ -111,12 +111,15 @@ class env_tree():
         
     
     def add_agent(self , node , agent , action):
+        ### add a new agent into specific node ###
         self.tree[node].add_agent(agent , action)
 
     def remove_agent(self , node , agent):
+        ### remove a agent of the specific node ###
         self.tree[node].remove_agent(agent)
 
     def visualize(self):
+        ### show the env tree ###
         bfs_li = self.__iter_around_env__(self.root)
         parent_li = []
         state = []
@@ -143,6 +146,8 @@ class env_tree():
         fig.show()
 
     def __iter_around_env__(self , node_key , around_factor = 1):
+        ### from the start node search around_factor parent as root , traversal the subtree ###
+        # return traversal node list
         bfs_queue = queue.Queue()
         start_node = node_key
         for _ in range(around_factor):
@@ -154,20 +159,20 @@ class env_tree():
 
         bfs_queue.put(start_node)
 
-        travel_rel = []
+        traversal_rel = []
 
 
         while not bfs_queue.empty():
             node_key = bfs_queue.get()
-            travel_rel.append(node_key)
+            traversal_rel.append(node_key)
             for child_name in self.tree[node_key].children:
                 bfs_queue.put(f"{node_key}:{child_name}")
 
-        return travel_rel
+        return traversal_rel
     
-    def observation(self , node):
-        
-        bfs_li = self.__iter_around_env__(node)
+    def observation(self , node , around_factor = 1):
+        ### return the observation with a node & around_factor
+        bfs_li = self.__iter_around_env__(node , around_factor)
         observation = []
         for node in bfs_li:
             observation += self.tree[node].observation()
