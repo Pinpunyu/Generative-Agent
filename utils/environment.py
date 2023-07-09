@@ -1,6 +1,8 @@
 import queue
 import plotly.graph_objects as go
-
+import json
+from typing import Union , Tuple
+from pathlib import Path
 class tree_node():
     def __init__(self , name , parent):
         ### Node INFO ###
@@ -37,8 +39,10 @@ class tree_node():
 
     def observation(self):
         observation = []
+        
         if self.state != None:
             observation.append(f"{self.name} is {self.state}")
+        
         
         for agent , action in self.agents.items():
             observation.append(f"{agent} is {action}")
@@ -49,16 +53,74 @@ class tree_node():
         return f"\tNode Name : {self.name} \n\tState : {self.state}\n\tParent : {self.parent} \n\tAgent : {self.agents} \n\tChildren : {self.children}\n"
     
 class env_tree():
-    def __init__(self , root_name):
+    def __init__(self , json : Union[str , Path] = None , places : list[str] = None):
         ### Tree ###
         # key   -> node name
         # value -> tree_node
         # root  -> root node name
+
         self.tree = {}
-        self.tree[f"{root_name}"] = tree_node(root_name , None)
-        self.root = root_name
+        self.root = None
+
+        if json != None:
+            self.load_from_json(json)
+
+        if places != None:
+            self.add_places(places)   
     
-    def insert_root(self , parent_name):
+        
+    def add_places(self , places : list[str]):
+        ### add muti place into tree ###
+        # place format = "A:B:C:D"
+        for place in places:
+            self.__add_place_node__(place)
+
+    def __add_place_node__(self , node_key : str):
+
+        node_path = node_key.split(':')
+        if self.root == None:
+            self.root = node_path[0]
+            self.tree[self.root] = tree_node(self.root, None)
+
+        children = ""
+        parent = None
+
+        for subnode in node_path:
+            children += subnode
+            # print(children)
+            if children not in self.tree:
+                self.tree[children] = tree_node(subnode , parent)
+                # print(self.tree[children])
+                self.add_children_node(parent , subnode)
+            
+            parent = children
+            children += ":"
+            
+    
+    def load_from_json(self , json_path : Union[str , Path]):
+        ### load env form json ###
+        # json formate
+        # {
+        #   "root" : "",
+        #   "node_key" : "parents_key",
+        #   "node_key" : "parents_key",
+        #   ...
+        # }
+        with open(json_path) as f:
+            tree_dict = json.load(f)
+
+        for node , parent in tree_dict.items():
+            node_name = node.split(':')[-1]
+            if parent == "":
+                self.root = node_name
+                self.tree[node_name] = tree_node(node_name , None)
+                parent = None 
+            else:
+                self.add_children_node(parent , node_name)
+
+    
+
+    def insert_root(self , parent_name:str):
         ### add a new root connect old root ###
         parent_key = parent_name
         old_root = self.root
@@ -78,7 +140,7 @@ class env_tree():
         self.root = parent_name
         
 
-    def add_children_node(self, parent_key , children_name):
+    def add_children_node(self, parent_key:str , children_name:str):
         ### add a child node in parent node ###
         # parent_key -> node path
         # children_name -> children name
@@ -110,11 +172,11 @@ class env_tree():
         # self.tree[parent].change_state(None)
         
     
-    def add_agent(self , node , agent , action):
+    def add_agent(self , node:str , agent:str , action:str):
         ### add a new agent into specific node ###
         self.tree[node].add_agent(agent , action)
 
-    def remove_agent(self , node , agent):
+    def remove_agent(self , node:str , agent:str):
         ### remove a agent of the specific node ###
         self.tree[node].remove_agent(agent)
 
@@ -128,10 +190,9 @@ class env_tree():
             parent_li.append(':'.join(node_key.split(':')[:-1]))
             state.append(f"{node_key.split(':')[-1]} : {self.tree[node_key].state}")
             value.append(1)
-            # state.append(1)
 
-        # print(parent_li)
-        # data = {'name' : bfs_li , 'parent' : parent_li }
+        # for i in range(0, len(bfs_li)):
+            # print(f"\"{bfs_li[i]}\" : \"{parent_li[i]}\",")
         
         fig = go.Figure(go.Treemap(
             labels=bfs_li , 
@@ -145,7 +206,7 @@ class env_tree():
         fig.update_layout(margin = dict(t=50, l=25, r=25, b=25))
         fig.show()
 
-    def __iter_around_env__(self , node_key , around_factor = 1):
+    def __iter_around_env__(self , node_key:str , around_factor :int = 1) -> list[str]:
         ### from the start node search around_factor parent as root , traversal the subtree ###
         # return traversal node list
         bfs_queue = queue.Queue()
@@ -153,7 +214,7 @@ class env_tree():
         for _ in range(around_factor):
             parent_name = self.tree[start_node].parent
             if parent_name != None:
-                start_node = ','.join(start_node.split(":")[:-1])
+                start_node = ':'.join(start_node.split(":")[:-1])
             else:
                 break
 
@@ -170,19 +231,30 @@ class env_tree():
 
         return traversal_rel
     
-    def observation(self , node , around_factor = 1):
-        ### return the observation with a node & around_factor
+    def observation(self , node:str , around_factor = 1) -> Tuple[list[str] , list[str]]:
+        ### return the observation & place with a node & around_factor
         bfs_li = self.__iter_around_env__(node , around_factor)
+        # root_node = bfs_li[0]
+        # depth = len(root_node.split(":")) - 1
         observation = []
+        place = []
         for node in bfs_li:
-            observation += self.tree[node].observation()
 
-        return observation     
+            place.append(node)
+            node_observation = self.tree[node].observation()
 
-    def __getitem__(self , key):
+            if len(node_observation) != 0:
+                observation += node_observation
+            
+                # place.append(':'.join(node.split(':')[depth:]))
+                
+
+        return observation , place
+
+    def __getitem__(self , key:str) -> tree_node:
         return self.tree[key]
 
-    def __str__(self):
+    def __str__(self) -> str:
 
         bfs_li = self.__iter_around_env__(self.root)
         ret = ""
@@ -192,76 +264,7 @@ class env_tree():
 
         return ret
 
-def nuk_town_init():
-    nuk_town = env_tree("NUK Town")
-    # depth 1
-    nuk_town.add_children_node("NUK Town" , "7-11")
-    nuk_town.add_children_node("NUK Town" , "Yui's home")
-    nuk_town.add_children_node("NUK Town" , "Pinyu's home")
-    nuk_town.add_children_node("NUK Town", "school")
-    nuk_town.add_children_node("NUK Town", "Prof. KCF's home")
-    # depth 2
-    nuk_town.add_children_node("NUK Town:7-11", "counter")
-    nuk_town.add_children_node("NUK Town:7-11", "product shelf")
 
-    nuk_town.add_children_node("NUK Town:Yui's home", "room")
-    nuk_town.add_children_node("NUK Town:Yui's home", "bathroom")
-
-    nuk_town.add_children_node("NUK Town:Pinyu's home", "room")
-    nuk_town.add_children_node("NUK Town:Pinyu's home", "bathroom")
-
-    nuk_town.add_children_node("NUK Town:school", "classroom 203")
-    nuk_town.add_children_node("NUK Town:school", "Prof. KCF's lab")
-
-    nuk_town.add_children_node("NUK Town:Prof. KCF's home" , "bedroom")
-    nuk_town.add_children_node("NUK Town:Prof. KCF's home" , "study room")
-    nuk_town.add_children_node("NUK Town:Prof. KCF's home" , "bathroom")
-    # depth 3
-    nuk_town.add_children_node("NUK Town:7-11:counter", "checkout counter 1")
-    nuk_town.add_children_node("NUK Town:7-11:counter", "checkout counter 2")
-    
-    nuk_town.add_children_node("NUK Town:7-11:product shelf", "product shelf 1")
-    nuk_town.add_children_node("NUK Town:7-11:product shelf", "product shelf 2")
-    nuk_town.add_children_node("NUK Town:7-11:product shelf", "product shelf 3")
-
-    nuk_town.add_children_node("NUK Town:Yui's home:room", "bed")
-    nuk_town.add_children_node("NUK Town:Yui's home:room", "computer")
-    nuk_town.add_children_node("NUK Town:Yui's home:room", "wardrobe")
-
-    nuk_town.add_children_node("NUK Town:Yui's home:bathroom", "sink")
-    nuk_town.add_children_node("NUK Town:Yui's home:bathroom", "toilet")
-    nuk_town.add_children_node("NUK Town:Yui's home:bathroom", "shower room")
-
-    nuk_town.add_children_node("NUK Town:Pinyu's home:room", "bed")
-    nuk_town.add_children_node("NUK Town:Pinyu's home:room", "computer")
-    nuk_town.add_children_node("NUK Town:Pinyu's home:room", "wardrobe")
-
-    nuk_town.add_children_node("NUK Town:Pinyu's home:bathroom", "sink")
-    nuk_town.add_children_node("NUK Town:Pinyu's home:bathroom", "toilet")
-    nuk_town.add_children_node("NUK Town:Pinyu's home:bathroom", "tub")
-
-    nuk_town.add_children_node("NUK Town:school:classroom 203", "desk 1")
-    nuk_town.add_children_node("NUK Town:school:classroom 203", "desk 2")
-    nuk_town.add_children_node("NUK Town:school:classroom 203", "podium")
-
-    nuk_town.add_children_node("NUK Town:school:Prof. KCF's lab", "computer 1")
-    nuk_town.add_children_node("NUK Town:school:Prof. KCF's lab", "computer 2")
-    nuk_town.add_children_node("NUK Town:school:Prof. KCF's lab", "meeting table")
-
-    nuk_town.add_children_node("NUK Town:Prof. KCF's home:bedroom" , "bed")
-    nuk_town.add_children_node("NUK Town:Prof. KCF's home:bedroom" , "tv")
-    nuk_town.add_children_node("NUK Town:Prof. KCF's home:bedroom" , "wardrobe")
-
-    nuk_town.add_children_node("NUK Town:Prof. KCF's home:study room" , "compter")
-    nuk_town.add_children_node("NUK Town:Prof. KCF's home:study room" , "bookcase")
-
-    nuk_town.add_children_node("NUK Town:Prof. KCF's home:bathroom" , "sink")
-    nuk_town.add_children_node("NUK Town:Prof. KCF's home:bathroom" , "tub")
-    nuk_town.add_children_node("NUK Town:Prof. KCF's home:bathroom" , "toilet")
-
-    # nuk_town.add_agent("school" , "yui" , "sleep")
-
-    return nuk_town
 
 if __name__ == "__main__":
     {
@@ -270,10 +273,11 @@ if __name__ == "__main__":
         "state" : None
     }
 
-
-    nuk_town = nuk_town_init()
+    nuk_town = env_tree("./data/env/nuk_town.json")
+    # nuk_town.load_from_json()
+    # nuk_town = nuk_town_init()
     # print(nuk_town)
-    nuk_town.insert_root("123456")
+    # nuk_town.insert_root("123456")
     nuk_town.visualize()
 
     

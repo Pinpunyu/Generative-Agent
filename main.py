@@ -1,7 +1,8 @@
 from utils.agent import Agent
-from utils.environment import nuk_town_init
-from anytree import Node, RenderTree
-
+from utils.environment import env_tree , tree_node
+from utils.generative_agents import generative_agents
+import datetime
+from pathlib import Path
 # Nuk = Node("Nuk")
 # School = Node("School", parent=Nuk)
 # classrooom1 = Node("classrooom1", parent=School)
@@ -17,33 +18,34 @@ from anytree import Node, RenderTree
 #     print("%s%s" % (pre, node.name))
 # print("")
 
-{
-    "name" : "nuk" ,
-    "agent" : [],
-    "state" : None
-}
 
+nuk_town_path = Path("./data/envs/nuk_town.json")
+agents_path = Path("./data/agents/")
 
-nuk_town = nuk_town_init()
-print(nuk_town.observation("NUK Town:Pinyu's home", 0))
-# nuk_town.insert_root("123456")
-# print(nuk_town)
+nuk_town = generative_agents(nuk_town_path , agents_path)
+
+print(nuk_town.agents[0])
+
+nuk_town.next_tick()
+
+print(nuk_town.agents[0])
+
+nuk_town.next_tick()
+
+print(nuk_town.agents[0])
+# observations , places = nuk_town.observation(pinyu.location)
+# print(observations)
+# print(place)
+# pinyu.knows_tree.visualize()
+# pinyu.update_knows_place(places)
+# pinyu.update_observation(observations , datetime.datetime.today())
+# pinyu.knows_tree.visualize()
+
+# observations , places = nuk_town.observation("NUK Town:Yui's home")
+# pinyu.update_knows_place(places)
+# pinyu.update_observation(observations , datetime.datetime.today())
+# pinyu.knows_tree.visualize()
+# nuk_town.add_places(["NUK Town:123:bathroom:456"])
 # nuk_town.visualize()
-
-
-
-pinyu = Agent("Pinyu", "21 years old is a student")
-
-
-
-
-# pinyu.print_self_knowledge()
-
-# known = ["Pinyu's home", "school"]
-# pinyu.agent_tree_init(known)
-
-# pinyu.new_observation(nuk_town, "NUK Town:Pinyu's home")
-# pinyu.new_observation(nuk_town, "NUK Town:Pinyu's home:room")
-# pinyu.new_observation(nuk_town, "NUK Town")
-# pinyu.new_observation(nuk_town, "NUK Town:Yui's home")
-# print(pinyu.get_memory(5))
+# print(nuk_town.observation("NUK Town:Prof. KCF's home:bathroom"))
+# print(pinyu)

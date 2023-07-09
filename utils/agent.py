@@ -1,85 +1,67 @@
 from utils.environment import env_tree
 from utils.environment import tree_node
-from anytree import Node, RenderTree, AsciiStyle
-
+import json
+from typing import Union , Tuple
+from pathlib import Path
+import datetime
 
 class Agent:
     
-    def __init__(self, name, self_knowledge, memory_stream = []):
-        self.name = name
-        self.self_knowledge = self_knowledge
-        # self.map = map
-        self.memory_stream = memory_stream
-        self.tree = env_tree()
-        self.location = ""
-        self.current_action = "sleep"
+    def __init__(self, json : Union[str , Path]):
+        
+        # self.tree = env_tree()
         self.current_conversation = None
+        self.memory_stream = []
+        self.load_json(json)
+        self.knows_tree = env_tree(places = [self.location])
+        
     
-    def __insert_child(self, parent, current):
+    def load_json(self , json_file : Union[str , Path]):
+        with open(json_file) as f:
+            agent_info = json.load(f)
+
+        self.name = f"{agent_info['First name']} {agent_info['Last name']}"
+        self.age = agent_info['Age']
+        self.innate_tendency = agent_info['Innate tendency']
+        self.learned_tendency = agent_info['Learned tendency']
+        self.currently = agent_info['Currently']
+        self.lifestyle = agent_info['Lifestyle']
+        self.location = agent_info['location']
+        self.plan = agent_info['Plan']
+
+    def update_observation(self , observations : list[str] , time : datetime):
+
+        for observation in observations:
+            self.memory_stream.append({
+                "observation" : observation,
+                "time" : time,
+                "last_use" : 0,
+            })
+
+    def update_knows_places(self , places : list[str]):
+        self.knows_tree.add_places(places)
+
+    def get_memory_stream(self , num : int) -> str:
+
+        ret = ""
         
-        node = parent+":"+current
-        childs = self.map.__iter_around_env__(node, 0) 
-        
-        for child in childs:
-            child_name = child.split(':')[-1]
-            parent_name = ':'.join(child.split(':')[:-1])
-            
-            if child_name != "" and ":" not in child_name:
-                self.tree.add_children_node(node , child_name)
-                self.__insert_child(node, child_name)
+        for i in range(-min(num , len(self.memory_stream)) , 0):
+            event = self.memory_stream[i]
+            ret += f"[{event['time']}] : {event['observation']}  / Last Use {event['last_use']}\n"
 
-    def agent_tree_init(self, known):
-
-        # 建立自己的root
-        self.tree = env_tree("NUK Town")
-
-        for place in known:
-            self.tree.add_children_node("NUK Town" , place)
-            # 繼續新增子節點
-            self.__insert_child(self.map.root, place)
-            
-        self.tree.visualize()
-
-    def print_self_knowledge(self):
-        print(f"My name is {self.name}. {self.self_knowledge}")
-        
-
-    def new_observation(self, map, place):
-
-        # 要是place沒有在自己的tree裡，要新增
-        # if findall(self.root, filter_=lambda node: node.name in (place)) == 0:
-        #     first = Node(place, parent=self.root)
-        #     self.__insert_child(first)
-        # 將place的observation push進memory stream
-
-        # print(f"{self.location}-{self.location.count(':')} {place}-{place.count(':')}")
-        print(place)
-        child_name = place.split(':')[-1]
-        parent_name = ':'.join(place.split(':')[:-1])
-
-        if self.tree == None:
-            print("begin")
-            self.tree = env_tree(place)
-        elif place.count(":")==0:
-            print("hi")
-            self.tree.insert_root(place)
-        else:
-            print("byt")
-            self.tree.add_children_node(parent_name, child_name)
-            # self.tree.insert_root(place)
-            # self.tree.visualize()
-
-        # self.tree.visualize()
-        self.location = place
+        return ret            
 
         
 
-
-        observations = map.observation(place)
-        print(observations)
-        # for observation in observations:
-        #     self.memory_stream.append(observation)
-        
-    def get_memory(self, num):
-
-        return self.memory_stream[-num:]
+    def __str__(self) -> str:
+        ret = f"""-- {self.name} / Age : {self.age} --
+Personality and Lifestyle : 
+    Innate tendency : {self.innate_tendency}
+    Learned tendency : {self.learned_tendency}
+    Currently : {self.currently}
+    Lifestyle : {self.lifestyle}
+Latest 50 memory :
+{self.get_memory_stream(50)}
+------------------"""
+                
+        return ret
