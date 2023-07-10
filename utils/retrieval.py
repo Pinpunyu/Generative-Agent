@@ -1,55 +1,115 @@
 from sentence_transformers import SentenceTransformer, util
 import numpy as np
-import matplotlib.pyplot as plt
 import math
 from datetime import datetime, timedelta
 
 class Retrieval:
 
-    def get_Recency(self, current_time, memory_time):
+    def get_recency(current_time : datetime, memory_times : list[datetime]) :
 
         initial_value = 1.0
         decay_factor = 0.99
-        time = (current_time-memory_time)
-        time = 24*time.days + time.seconds/3600
 
-        return initial_value * math.pow(decay_factor, time)
+        score = [0 for i in range(len(memory_times))]
 
-    def get_Relevance(self, sentence1, sentence2):
+        for idx , memory_time in enumerate(memory_times):
+
+            time = (current_time-memory_time)
+            time = 24*time.days + time.seconds/3600
+            
+            score[idx] = initial_value * math.pow(decay_factor, time)
+        
+        score = np.array(score)
+        return score / np.linalg.norm(score)
+        
+
+    def get_relevance(query : str , sentences : list[str]):
 
         model = SentenceTransformer('sentence-transformers/all-MiniLM-L6-v2')
+        query_embedding = model.encode(query , convert_to_tensor=True)
+        score = [0 for i in range(len(sentences))]
 
-        embedding_1= model.encode(sentence1, convert_to_tensor=True)
-        embedding_2 = model.encode(sentence2, convert_to_tensor=True)
+        for idx , sentence in enumerate(sentences):
+            embedding = model.encode(sentence, convert_to_tensor=True)
+            score[idx] = util.pytorch_cos_sim(query_embedding, embedding).to("cpu").item()
         
-        return util.pytorch_cos_sim(embedding_1, embedding_2)
+        # print(score)
+        score = np.array(score)
+        return score / np.linalg.norm(score)
+    
+    def get_importantance(observations:list[str]):
+        
+        score = [0 for i in range(len(observations))]
+        for idx , observation in enumerate(observations):
+            prompt = (
+            "On the scale of 1 to 10, \n"
+            "where 1 is purely mundane (e.g., <相似範例(similary examples)>) \n"
+            "and 10 is extremely poignant (e.g., <相似範例(similary examples)>), \n"
+            "rate the likely poignancy of the following piece of memory.\n"
+            f"Memory: {observation}"
+            "Rating: <fill in>"
+            )
+            score[idx] = 50
+
+        score = np.array(score)
+        return score / np.linalg.norm(score)
+    
+    def get_retrieval(memory_stream:list[dict] , query , time):
+
+        last_use = [0 for i in range(len(memory_stream))]
+        observations = [0 for i in range(len(memory_stream))]
+        importantance_score = [0 for i in range(len(memory_stream))]
+        for idx , observation in enumerate(memory_stream):
+            last_use[idx] = observation["last_use"]
+            observations[idx] = observation["observation"]
+            # importantance_score = observation['importantance']
+
+        importantance_factor = 1
+        relevance_factor = 1
+        recency_factor = 1
+        
+        recency_score = Retrieval.get_recency(time , last_use) * recency_factor
+        importantance_score = Retrieval.get_importantance(observations) * importantance_factor 
+        relevance_score = Retrieval.get_relevance(query , observations) * relevance_factor
+        
+        score = recency_score * recency_factor + importantance_score * importantance_factor + relevance_score * relevance_factor
+
+
+        sorted_memory_streams = memory_stream.copy()
+
+        for idx , sc in enumerate(sorted_memory_streams):
+            sorted_memory_streams[idx]["score"] = score[idx]
+
+        sorted_memory_streams.sort(key=lambda element: element['score'] , reverse=True)
+
+        for i in sorted_memory_streams:
+            print(i)
+        
+    
+
+
         
 
 if __name__ == "__main__":
     
-    test = Retrieval()
+    
 
     current_time = datetime(2022,6,13,0,20,15)
+    memory_stream = []
     
-    x = list(range(0, 14))
-    y = []
 
     for time in range(0, 14):
         memory_time = datetime(2022,6,10,15-time,20,15)
-        y.append(test.get_Recency(current_time, memory_time))     
+    
+        memory_stream.append({
+            "observation" : str(time),
+            "time" : memory_time,
+            "last_use" : memory_time,
+        })
 
-    plt.plot(x, y, 'r')   
-    plt.show()
+    # print(y)
+    
+    Retrieval.get_retrieval(memory_stream , "123" , current_time)
+    # score = Retrieval.get_recency(current_time , time)
+    # print(score)
 
-    # get_relevance
-    # sentence1 = "I eat an apple."
-    # sentence2 = "I use Apple cellphone."
-    # sentence3 = "My favorite fruit is apple."
-
-    sentence1 = "Just now, the teacher taught us something related to chemistry."
-    sentence2 = "After class, my classmates and I were discussing chemistry."
-    sentence3 = "I have cereal and milk for breakfast."
-
-    print(test.get_Relevance(sentence1, sentence2))
-    print(test.get_Relevance(sentence2, sentence3))
-    print(test.get_Relevance(sentence3, sentence1))

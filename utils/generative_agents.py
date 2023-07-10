@@ -6,7 +6,7 @@ from typing import Union , Tuple
 
 class generative_agents():
     
-    def __init__(self , env_json : Union[str , Path], agents_path : Union[str , Path], init_time : datetime = datetime.datetime(2023,1,1,00,00,00,00) , tick :int= 10):
+    def __init__(self , env_json : Union[str , Path], agents_path : Union[str , Path], init_time : datetime = datetime.datetime(2023,7,9,00,00,00,00) , tick :int= 10):
         self.env = env_tree(env_json)
         self.agents : list[Agent] = []
         self.time = init_time

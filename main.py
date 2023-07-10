@@ -23,16 +23,20 @@ nuk_town_path = Path("./data/envs/nuk_town.json")
 agents_path = Path("./data/agents/")
 
 nuk_town = generative_agents(nuk_town_path , agents_path)
+print(nuk_town.agents[0].__gen_plan__(str(nuk_town.time.date())))
+# print(datetime.datetime(2023,7,9,0,0,0).date())
+# nuk_town.env.visualize()
 
-print(nuk_town.agents[0])
 
-nuk_town.next_tick()
+# print(nuk_town.agents[0])
 
-print(nuk_town.agents[0])
+# nuk_town.next_tick()
 
-nuk_town.next_tick()
+# print(nuk_town.agents[0])
 
-print(nuk_town.agents[0])
+# nuk_town.next_tick()
+
+# print(nuk_town.agents[0])
 # observations , places = nuk_town.observation(pinyu.location)
 # print(observations)
 # print(place)

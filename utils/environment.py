@@ -206,47 +206,46 @@ class env_tree():
         fig.update_layout(margin = dict(t=50, l=25, r=25, b=25))
         fig.show()
 
-    def __iter_around_env__(self , node_key:str , around_factor :int = 1) -> list[str]:
+    def __iter_around_env__(self , node_key:str , up_level :int = 10 , down_level :int = 10) -> list[str]:
         ### from the start node search around_factor parent as root , traversal the subtree ###
         # return traversal node list
         bfs_queue = queue.Queue()
         start_node = node_key
-        for _ in range(around_factor):
+        for _ in range(up_level):
             parent_name = self.tree[start_node].parent
             if parent_name != None:
                 start_node = ':'.join(start_node.split(":")[:-1])
             else:
                 break
 
-        bfs_queue.put(start_node)
+        bfs_queue.put((start_node,0))
 
         traversal_rel = []
 
 
         while not bfs_queue.empty():
-            node_key = bfs_queue.get()
+            node_key , level = bfs_queue.get()
             traversal_rel.append(node_key)
-            for child_name in self.tree[node_key].children:
-                bfs_queue.put(f"{node_key}:{child_name}")
+            if (level+1) <= down_level:
+                for child_name in self.tree[node_key].children:
+                    bfs_queue.put((f"{node_key}:{child_name}" , level+1))
 
         return traversal_rel
     
-    def observation(self , node:str , around_factor = 1) -> Tuple[list[str] , list[str]]:
+    def observation(self , node:str , observate_factor :tuple[int,int] = (1,10) , place_factor :tuple[int,int] = (2,1)) -> Tuple[list[str] , list[str]]:
         ### return the observation & place with a node & around_factor
-        bfs_li = self.__iter_around_env__(node , around_factor)
-        # root_node = bfs_li[0]
-        # depth = len(root_node.split(":")) - 1
+        bfs_li = self.__iter_around_env__(node ,  observate_factor[0] ,  observate_factor[1])
         observation = []
-        place = []
         for node in bfs_li:
-
-            place.append(node)
             node_observation = self.tree[node].observation()
-
             if len(node_observation) != 0:
                 observation += node_observation
             
-                # place.append(':'.join(node.split(':')[depth:]))
+        bfs_li = self.__iter_around_env__(node ,  place_factor[0] ,  place_factor[1])
+        
+        place = []
+        for node in bfs_li:
+            place.append(node)
                 
 
         return observation , place
@@ -278,7 +277,8 @@ if __name__ == "__main__":
     # nuk_town = nuk_town_init()
     # print(nuk_town)
     # nuk_town.insert_root("123456")
-    nuk_town.visualize()
+    # nuk_town.visualize()
+    print(nuk_town.__iter_around_env__("NUK Town:Yui's home:room" , 1 , 1))
 
     
 

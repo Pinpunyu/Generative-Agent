@@ -14,6 +14,7 @@ class Agent:
         self.memory_stream = []
         self.load_json(json)
         self.knows_tree = env_tree(places = [self.location])
+
         
     
     def load_json(self , json_file : Union[str , Path]):
@@ -27,7 +28,9 @@ class Agent:
         self.currently = agent_info['Currently']
         self.lifestyle = agent_info['Lifestyle']
         self.location = agent_info['location']
-        self.plan = agent_info['Plan']
+        self.plans = agent_info['Plan']
+        
+        self.actions = agent_info['action']
 
     def update_observation(self , observations : list[str] , time : datetime):
 
@@ -36,6 +39,7 @@ class Agent:
                 "observation" : observation,
                 "time" : time,
                 "last_use" : 0,
+                "importantance" : 0
             })
 
     def update_knows_places(self , places : list[str]):
@@ -50,18 +54,51 @@ class Agent:
             ret += f"[{event['time']}] : {event['observation']}  / Last Use {event['last_use']}\n"
 
         return ret            
+    
+    def __gen_plan__(self , date):
+        
+        summary = self.__gen_summary__(date)
+        prev_plan = ""
+
+        for idx , plan in enumerate(self.plans[date]):
+            prev_plan += f"{idx+1}) {plan}, "
+
+        prompt = (
+            f"Name: {self.name} (age: {self.age})\n"
+            f"Innate traits: {self.innate_tendency}\n"
+            f"{summary},{prev_plan}\n"
+            f"Today is {date}. Here is {self.name}’s plan today in broad strokes: 1)\n"
+            )
+        
+        return prompt
+
+    def __gen_summary__(self , date):
+
+        prompt = (
+            f"How would one describe {self.name}'s core characteristics given the following statements?\n"
+            )
+        
+        for action in self.actions[date]:
+            prompt += f"- {action['action']}\n"
+
+        return "summary"
+    
+    def __gen_retriebal__():
+        pass
+        
 
         
 
     def __str__(self) -> str:
-        ret = f"""-- {self.name} / Age : {self.age} --
-Personality and Lifestyle : 
-    Innate tendency : {self.innate_tendency}
-    Learned tendency : {self.learned_tendency}
-    Currently : {self.currently}
-    Lifestyle : {self.lifestyle}
-Latest 50 memory :
-{self.get_memory_stream(50)}
-------------------"""
+        ret = (
+            f"-- {self.name} / Age : {self.age} --\n"
+            "Personality and Lifestyle : \n"
+            f"Innate tendency : {self.innate_tendency}\n"
+            f"Learned tendency : {self.learned_tendency}\n"
+            f"Currently : {self.currently}\n"
+            f"Lifestyle : {self.lifestyle}\n"
+            "Latest 50 memory :\n"
+            f"{self.get_memory_stream(50)}\n"
+        )
                 
         return ret
