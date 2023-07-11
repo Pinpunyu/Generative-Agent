@@ -14,6 +14,7 @@ class Agent:
         self.current_action = None
         self.current_conversation = None
         self.memory_stream = []
+        self.conversation_history : list[dict] = []
         self.load_json(json)
         self.knows_tree = env_tree(places = [self.location])
 
@@ -42,7 +43,7 @@ class Agent:
                 "observation" : observation,
                 "observed_entity" : observation.split(" ")[0],
                 "time" : time,
-                "last_use" : datetime.datetime(2023,1,1,0,0,0),
+                "last_used" : datetime.datetime(2023,1,1,0,0,0),
                 "importantance" : importantance[idx]
             })
 
@@ -55,28 +56,32 @@ class Agent:
         
         for i in range(-min(num , len(self.memory_stream)) , 0):
             event = self.memory_stream[i]
-            ret += f"[{event['time']}] : {event['observation']}  / Last Use {event['last_use']}\n"
+            ret += f"[{event['time']}] : {event['observation']}  / last used {event['last_used']}\n"
 
         return ret            
     
     def __gen_plan__(self , date : datetime):
         ### gen the agent's plan ###
-        # TODO recursive / summarize prev day
+        ### TODO recursive / summarize prev day ###
 
         # summary = self.__gen_summary__(str(date - datetime.timedelta(days=1)))
         prev_plan = ""
 
-        for idx , plan in enumerate(self.plans[str(date - datetime.timedelta(days=1))]):
+        prev_day = (date - datetime.timedelta(days=1)).date()
+
+
+        for idx , plan in enumerate(self.plans[str(prev_day)]):
             prev_plan += f"{idx+1}) {plan}, "
 
         prompt = (
             f"Name: {self.name} (age: {self.age})\n"
             f"Innate traits: {self.innate_tendency}\n"
-            # need prev day summary
+            ### !!! TODO summarize prev day !!! ###
             f",{prev_plan}\n"
             f"Today is {date}. Here is {self.name}’s plan today in broad strokes: 1)\n"
             )
         
+        ### !!! TODO LLM output !!! ###
         plans = "1)sleep , 2) go to school"
 
 
@@ -93,22 +98,26 @@ class Agent:
         for observation in retrieval:
             prompt += f"- {observation['observation']}\n"
 
+        ### !!! TODO LLM output !!! ###
         return "summary"
     
     def __gen_retrieval__(self , query : str, pick_num : int, time : datetime) -> list[dict]:
-        ### gen top {pick_num} memory of retrieval score ###
-        # TODO update last_use
+        ### gen top {pick_num} memory of retrieval score and update last used ###
         sorted_memeory_stream = Retrieval.get_retrieval(self.memory_stream , query, time)
+
+        for observation in sorted_memeory_stream[:pick_num]:
+            self.memory_stream[observation['ori_idx']]['last_used'] = time
+
         return sorted_memeory_stream[:pick_num]
         
-    def __gen_reflection__(self):
+    def __gen_reflection__(self , time , pick_num):
         ### reflection ###
-        # TODO add into memory
+        # pick lastest {pick_num} observation gen reflect and add into memory streams
 
 
         # memory = self.__gen_retrieval__(query, 50 , time)
         # retrieval = ''.join([f"{idx+1}. {i['observation']}\n" for idx , i in enumerate(memory)])
-        recent_memeory_stream = ''.join([f"{idx+1}. {i['observation']}\n" for idx , i in enumerate(self.memory_stream[:100])])
+        recent_memeory_stream = ''.join([f"{idx+1}. {i['observation']}\n" for idx , i in enumerate(self.memory_stream[:pick_num])])
 
         prompt = (
             f"Statements about {self.name}\n"
@@ -116,27 +125,28 @@ class Agent:
             "What 5 high-level insights can you infer from the above statements?\n"
             "(example format: insight(because of 1, 5, 3))\n"
         )
+
+        ### !!! TODO LLM output !!! ###
+        reflect = "Klaus Mueller is dedicated to his research on gentrification (because of 1, 2, 8, 15)"
+
+        self.update_observation([reflect] , time)
     
-        # print(prompt)
-        # return "Klaus Mueller is dedicated to his research on gentrification (because of 1, 2, 8, 15)"
     
-    def __gen_reaction__(self , observation , date):
+    def __gen_reaction__(self , observation , time):
         ### from observation decide whether to react ###
         # TODO retrieval A & B's summary / add into action
 
-
-        
-        agent_summary =  self.__gen_summary_description__(date)
+        agent_summary =  self.__gen_summary_description__(time)
         
         query_A = f"What is {self.name}'s relationship with the {observation['observed_entity']} ?"
         query_B = f"{observation['observation']}"
 
-        memory = self.__gen_retrieval__(query_A , 10 , date) + self.__gen_retrieval__(query_B , 10 , date)
+        memory = self.__gen_retrieval__(query_A , 10 , time) + self.__gen_retrieval__(query_B , 10 , time)
         statements = [i['observation'] for i in memory]
         
         prompt = (
             f"{agent_summary}\n"
-            f"It is {str(date)}\n"
+            f"It is {str(time)}\n"
             f"{self.name}'s status: {self.current_action}\n"
             f"Observation: {observation}\n"
             # need retrieval A & B's summary
@@ -146,6 +156,7 @@ class Agent:
 
         if self.current_conversation == None:
             prompt += (f"Should {self.name} react to the observation, and if so, what would be an appropriate reaction?\n")
+            ### !!! TODO LLM output !!! ###
             react = "John is asking Eddy about his music composition project"
             dialogue_prompt = '\n'.join(prompt.split("\n")[:-1])
             dialogue_prompt += ( 
@@ -159,23 +170,30 @@ class Agent:
             )
         
 
-        self.__gen_dialogue__(dialogue_prompt)
-        # if agent decide to react or is aleardy in dialogue
-        
+        self.__gen_dialogue__(dialogue_prompt , time)
+
     
-    def __gen_dialogue__(self , dialogue_prompt):
-        # TODO all
+    def __gen_dialogue__(self , dialogue_prompt , time):
+        ### agent dialogue ###
+        
 
-
+        ### !!! TODO LLM output !!! ###
         conversation = "Hello"
 
+        # agent not have conversation now 
         if self.current_conversation == None:
-            self.current_conversation = f"{self.name} : {conversation}\n"
+            self.current_conversation = {
+                "create_time" : str(time),
+                "conversation" : f"{self.name} : {conversation}\n"
+            }
+        # agent have conversation now 
+        elif conversation != None:
+            self.current_conversation["conversation"] += f"{self.name} : {conversation}\n"
+        # agent decide end the conversation
         else:
-            self.current_conversation += f"{self.name} : {conversation}\n"
-            
+            self.conversation_history.append(self.current_conversation)
+            self.current_conversation = None
 
-        pass
 
     def __str__(self) -> str:
         ret = (
@@ -187,6 +205,10 @@ class Agent:
             f"Lifestyle : {self.lifestyle}\n"
             "Latest 50 memory :\n"
             f"{self.get_memory_stream(50)}\n"
+            f"plan:\n"
+            f"{self.plans}\n"
+            f"conversation histtiory :\n"
+            f"{self.conversation_history}"
         )
                 
         return ret

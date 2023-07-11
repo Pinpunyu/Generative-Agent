@@ -60,7 +60,7 @@ class Retrieval:
         observations = [0 for i in range(len(memory_stream))]
         importantance_score = [0 for i in range(len(memory_stream))]
         for idx , observation in enumerate(memory_stream):
-            last_use[idx] = observation["last_use"]
+            last_use[idx] = observation["last_used"]
             observations[idx] = observation["observation"]
             importantance_score = observation['importantance']
 
@@ -79,6 +79,7 @@ class Retrieval:
 
         for idx , sc in enumerate(sorted_memory_streams):
             sorted_memory_streams[idx]["score"] = score[idx]
+            sorted_memory_streams[idx]["ori_idx"] = idx
 
         sorted_memory_streams.sort(key=lambda element: element['score'] , reverse=True)
 
