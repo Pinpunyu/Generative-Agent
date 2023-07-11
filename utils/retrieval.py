@@ -62,14 +62,14 @@ class Retrieval:
         for idx , observation in enumerate(memory_stream):
             last_use[idx] = observation["last_use"]
             observations[idx] = observation["observation"]
-            # importantance_score = observation['importantance']
+            importantance_score = observation['importantance']
 
         importantance_factor = 1
         relevance_factor = 1
         recency_factor = 1
         
         recency_score = Retrieval.get_recency(time , last_use) * recency_factor
-        importantance_score = Retrieval.get_importantance(observations) * importantance_factor 
+        # importantance_score = Retrieval.get_importantance(observations) * importantance_factor 
         relevance_score = Retrieval.get_relevance(query , observations) * relevance_factor
         
         score = recency_score * recency_factor + importantance_score * importantance_factor + relevance_score * relevance_factor
@@ -82,8 +82,8 @@ class Retrieval:
 
         sorted_memory_streams.sort(key=lambda element: element['score'] , reverse=True)
 
-        for i in sorted_memory_streams:
-            print(i)
+        return sorted_memory_streams
+        
         
     
 
