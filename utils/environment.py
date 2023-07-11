@@ -207,7 +207,7 @@ class env_tree():
         fig.show()
 
     def __iter_around_env__(self , node_key:str , up_level :int = 10 , down_level :int = 10) -> list[str]:
-        ### from the start node search around_factor parent as root , traversal the subtree ###
+        ### from the start node search {up_level} parent as root , traversal the subtree with {down_level} depth ###
         # return traversal node list
         bfs_queue = queue.Queue()
         start_node = node_key
@@ -233,7 +233,10 @@ class env_tree():
         return traversal_rel
     
     def observation(self , node:str , observate_factor :tuple[int,int] = (1,10) , place_factor :tuple[int,int] = (2,1)) -> Tuple[list[str] , list[str]]:
-        ### return the observation & place with a node & around_factor
+        ### return the observation & place with a node ###
+        # give the observation up / down level
+        # give the place up / down level
+
         bfs_li = self.__iter_around_env__(node ,  observate_factor[0] ,  observate_factor[1])
         observation = []
         for node in bfs_li:

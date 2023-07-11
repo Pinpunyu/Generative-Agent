@@ -8,10 +8,10 @@
     "Lifestyle" : "Isabella Rodriguez goes to bed around 11pm, awakes up around 6am.",
     "Plan" : 
     {
-        "2023-07-09" : [
+        "2023-07-07" : [
             "plan 1" , "plan 2"
         ],
-        "2023-07-10" : [
+        "2023-07-08" : [
             "plan 1" , "plan 2"
         ]
     },
@@ -19,12 +19,12 @@
 
     "action" : 
     {
-        "2023-07-09" : [
+        "2023-07-07" : [
             {"time" : "00:00:00" , "action" : "action 1"}, 
             {"time" : "00:07:00" , "action" : "action 2"}
         ],
 
-        "2023-07-10" : [
+        "2023-07-08" : [
             {"time" : "00:00:00" , "action" : "action 1"}, 
             {"time" : "00:07:00" , "action" : "action 2"}
         ]

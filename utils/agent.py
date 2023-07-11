@@ -1,5 +1,6 @@
 from utils.environment import env_tree
 from utils.environment import tree_node
+from utils.retrieval import Retrieval
 import json
 from typing import Union , Tuple
 from pathlib import Path
@@ -34,12 +35,14 @@ class Agent:
 
     def update_observation(self , observations : list[str] , time : datetime):
 
-        for observation in observations:
+        importantance = Retrieval.get_importantance(observations)
+        for idx , observation in enumerate(observations):
             self.memory_stream.append({
                 "observation" : observation,
+                "observed_entity" : observation.split(" ")[0],
                 "time" : time,
-                "last_use" : 0,
-                "importantance" : 0
+                "last_use" : datetime.datetime(2023,1,1,0,0,0),
+                "importantance" : importantance[idx]
             })
 
     def update_knows_places(self , places : list[str]):
@@ -55,39 +58,94 @@ class Agent:
 
         return ret            
     
-    def __gen_plan__(self , date):
-        
-        summary = self.__gen_summary__(date)
+    def __gen_plan__(self , date : datetime):
+        ### gen the agent's plan ###
+        # TODO recursive / summarize prev day
+
+        # summary = self.__gen_summary__(str(date - datetime.timedelta(days=1)))
         prev_plan = ""
 
-        for idx , plan in enumerate(self.plans[date]):
+        for idx , plan in enumerate(self.plans[str(date - datetime.timedelta(days=1))]):
             prev_plan += f"{idx+1}) {plan}, "
 
         prompt = (
             f"Name: {self.name} (age: {self.age})\n"
             f"Innate traits: {self.innate_tendency}\n"
-            f"{summary},{prev_plan}\n"
+            # need prev day summary
+            f",{prev_plan}\n"
             f"Today is {date}. Here is {self.name}’s plan today in broad strokes: 1)\n"
             )
         
-        return prompt
+        plans = "1)sleep , 2) go to school"
 
-    def __gen_summary__(self , date):
 
+        self.plans[str(date)] = [i.split(')')[-1] for i in plans.split(",")]
+
+    def __gen_summary_description__(self , time:datetime) -> str:
+        ### gen [Agent’s Summary Description] ###
         prompt = (
             f"How would one describe {self.name}'s core characteristics given the following statements?\n"
             )
         
-        for action in self.actions[date]:
-            prompt += f"- {action['action']}\n"
+        retrieval = self.__gen_retrieval__(f"{self.name}'s core characteristics." , 10 , time)
+
+        for observation in retrieval:
+            prompt += f"- {observation['observation']}\n"
 
         return "summary"
     
-    def __gen_retriebal__():
-        pass
+    def __gen_retrieval__(self , query : str, pick_num : int, time : datetime) -> list[dict]:
+        ### gen top {pick_num} memory of retrieval score ###
+        # TODO update last_use
+        sorted_memeory_stream = Retrieval.get_retrieval(self.memory_stream , query, time)
+        return sorted_memeory_stream[:pick_num]
         
+    def __gen_reflection__(self):
+        ### reflection ###
+        # TODO add into memory
 
+
+        # memory = self.__gen_retrieval__(query, 50 , time)
+        # retrieval = ''.join([f"{idx+1}. {i['observation']}\n" for idx , i in enumerate(memory)])
+        recent_memeory_stream = ''.join([f"{idx+1}. {i['observation']}\n" for idx , i in enumerate(self.memory_stream[:100])])
+
+        prompt = (
+            f"Statements about {self.name}\n"
+            f"{recent_memeory_stream}"
+            "What 5 high-level insights can you infer from the above statements?\n"
+            "(example format: insight(because of 1, 5, 3))\n"
+        )
+    
+        # print(prompt)
+        # return "Klaus Mueller is dedicated to his research on gentrification (because of 1, 2, 8, 15)"
+    
+    def __gen_reaction__(self , observation , date):
+        ### from observation decide whether to react ###
+        # TODO retrieval A & B's summary / add into action
+
+
+        query_A = f"What is {self.name}'s relationship with the {observation['observed_entity']} ?"
+        query_B = f"{observation['observation']}"
+
+        memory = self.__gen_retrieval__(query_A , 10 , date) + self.__gen_retrieval__(query_B , 10 , date)
+        statements = [i['observation'] for i in memory]
         
+        # summary = self.__gen_summary__(statements)
+        # print(statement)
+
+        prompt = (
+            "[Agent's Summary Description]"
+            f"It is {str(date)}"
+            f"{self.name}'s status: <status>"
+            f"Observation: {observation}"
+            # need retrieval A & B's summary
+            f"Summary of relevant context from {self.name}'s memory: "
+            "Should <Name> react to the observation, and if so, what would be an appropriate reaction?"
+        )
+    
+    def __gen_dialogue__(self):
+        # TODO all
+        pass
 
     def __str__(self) -> str:
         ret = (
@@ -102,3 +160,4 @@ class Agent:
         )
                 
         return ret
+    
