@@ -11,6 +11,7 @@ class Agent:
     def __init__(self, json : Union[str , Path]):
         
         # self.tree = env_tree()
+        self.current_action = None
         self.current_conversation = None
         self.memory_stream = []
         self.load_json(json)
@@ -124,27 +125,56 @@ class Agent:
         # TODO retrieval A & B's summary / add into action
 
 
+        
+        agent_summary =  self.__gen_summary_description__(date)
+        
         query_A = f"What is {self.name}'s relationship with the {observation['observed_entity']} ?"
         query_B = f"{observation['observation']}"
 
         memory = self.__gen_retrieval__(query_A , 10 , date) + self.__gen_retrieval__(query_B , 10 , date)
         statements = [i['observation'] for i in memory]
         
-        # summary = self.__gen_summary__(statements)
-        # print(statement)
-
         prompt = (
-            "[Agent's Summary Description]"
-            f"It is {str(date)}"
-            f"{self.name}'s status: <status>"
-            f"Observation: {observation}"
+            f"{agent_summary}\n"
+            f"It is {str(date)}\n"
+            f"{self.name}'s status: {self.current_action}\n"
+            f"Observation: {observation}\n"
             # need retrieval A & B's summary
-            f"Summary of relevant context from {self.name}'s memory: "
-            "Should <Name> react to the observation, and if so, what would be an appropriate reaction?"
+            f"Summary of relevant context from {self.name}'s memory: \n"
+            
         )
+
+        if self.current_conversation == None:
+            prompt += (f"Should {self.name} react to the observation, and if so, what would be an appropriate reaction?\n")
+            react = "John is asking Eddy about his music composition project"
+            dialogue_prompt = '\n'.join(prompt.split("\n")[:-1])
+            dialogue_prompt += ( 
+                f"{react}"
+                f"What would he say to {observation['observed_entity']}?"
+            )
+        else:
+            prompt += (
+                f"{self.current_conversation}"
+                f"How would {self.name} respond to {observation['observed_entity']}?"
+            )
+        
+
+        self.__gen_dialogue__(dialogue_prompt)
+        # if agent decide to react or is aleardy in dialogue
+        
     
-    def __gen_dialogue__(self):
+    def __gen_dialogue__(self , dialogue_prompt):
         # TODO all
+
+
+        conversation = "Hello"
+
+        if self.current_conversation == None:
+            self.current_conversation = f"{self.name} : {conversation}\n"
+        else:
+            self.current_conversation += f"{self.name} : {conversation}\n"
+            
+
         pass
 
     def __str__(self) -> str:
