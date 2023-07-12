@@ -8,14 +8,48 @@
     "Lifestyle" : "Isabella Rodriguez goes to bed around 11pm, awakes up around 6am.",
     "Plan" : 
     {
-        "2023-07-07" : [
-            "plan 1" , "plan 2"
-        ],
-        "2023-07-08" : [
-            "plan 1" , "plan 2"
-        ]
+        "2023-07-07" : {
+            "rough_plan" : [
+                "plan 1" , "plan 2"
+            ],
+
+            "detail_plan" : [
+                
+                {
+                    "plan" : "plan 1" ,
+                    "time" : "4:00"
+                },
+                {
+                    "plan" : "plan 2",
+                    "time" : "4:05"
+                } 
+                
+            ]
+        },
+
+        "2023-07-08" : {
+            "rough_plan" : [
+                "plan 1" , "plan 2"
+            ],
+
+            "detail_plan" : [
+                
+                {
+                    "plan" : "plan 1" ,
+                    "time" : "4:00"
+                },
+                {
+                    "plan" : "plan 2",
+                    "time" : "4:05"
+                } 
+                
+            ]
+        }
+         
+        
+        
     },
-    "location" : "NUK Town:Yui's home:room",
+    "location" : "NUK Town:Yui's home:room:bed",
 
     "action" : 
     {
