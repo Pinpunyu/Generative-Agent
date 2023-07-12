@@ -1,0 +1,67 @@
+{
+    "First name" : "Maria",
+    "Last name" : "Lopez",
+    "Age" : 21,
+    "Innate tendency" : "energetic, enthusiastic, inquisitive",
+    "Learned tendency" : "Maria Lopez is a student at Oak Hill College studying physics and a part time Twitch game streamer who loves to connect with people and explore new ideas.",
+    "Currently" : "Maria Lopez is working on her physics degree and streaming games on Twitch to make some extra money. She visits Hobbs Cafe for studying and eating just about everyday.",
+    "Lifestyle" : "Maria Lopez goes to bed around midnight, awakes up around 10am, eats dinner around 7pm.",
+    "Plan" : 
+    {
+        "2023-07-07" : {
+            "rough_plan" : [
+                "plan 1" , "plan 2"
+            ],
+
+            "detail_plan" : [
+                
+                {
+                    "plan" : "plan 1" ,
+                    "time" : "4:00"
+                },
+                {
+                    "plan" : "plan 2",
+                    "time" : "4:05"
+                } 
+                
+            ]
+        },
+
+        "2023-07-08" : {
+            "rough_plan" : [
+                "plan 1" , "plan 2"
+            ],
+
+            "detail_plan" : [
+                
+                {
+                    "plan" : "plan 1" ,
+                    "time" : "4:00"
+                },
+                {
+                    "plan" : "plan 2",
+                    "time" : "4:05"
+                } 
+                
+            ]
+        }
+         
+        
+        
+    },
+    "location" : "NUK Town:school:Prof. KCF's lab:computer 1",
+
+    "action" : 
+    {
+        "2023-07-07" : [
+            {"time" : "00:00:00" , "action" : "action 1"}, 
+            {"time" : "00:07:00" , "action" : "action 2"}
+        ],
+
+        "2023-07-08" : [
+            {"time" : "00:00:00" , "action" : "action 1"}, 
+            {"time" : "00:07:00" , "action" : "action 2"}
+        ]
+    }
+
+} 

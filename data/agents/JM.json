@@ -1,0 +1,67 @@
+{
+    "First name" : "Jennifer",
+    "Last name" : "Moore",
+    "Age" : 68,
+    "Innate tendency" : "wise, experienced, warm",
+    "Learned tendency" : "Jennifer Moore is a watercolor painter who has been painting for over fifty years. She is wise and experienced, and her work is full of warmth.",
+    "Currently" : "Jennifer Moore lives with her husband of 40 years, Sam Moore, and is preparing for an exhibition of her work. She is also mentoring younger artists to help them find their own creative voice.",
+    "Lifestyle" : "Jennifer Moore goes to bed around 9pm, awakes up around 5am, eats dinner around 5pm.",
+    "Plan" : 
+    {
+        "2023-07-07" : {
+            "rough_plan" : [
+                "plan 1" , "plan 2"
+            ],
+
+            "detail_plan" : [
+                
+                {
+                    "plan" : "plan 1" ,
+                    "time" : "4:00"
+                },
+                {
+                    "plan" : "plan 2",
+                    "time" : "4:05"
+                } 
+                
+            ]
+        },
+
+        "2023-07-08" : {
+            "rough_plan" : [
+                "plan 1" , "plan 2"
+            ],
+
+            "detail_plan" : [
+                
+                {
+                    "plan" : "plan 1" ,
+                    "time" : "4:00"
+                },
+                {
+                    "plan" : "plan 2",
+                    "time" : "4:05"
+                } 
+                
+            ]
+        }
+         
+        
+        
+    },
+    "location" : "NUK Town:Pinyu's home:room:bed",
+
+    "action" : 
+    {
+        "2023-07-07" : [
+            {"time" : "00:00:00" , "action" : "action 1"}, 
+            {"time" : "00:07:00" , "action" : "action 2"}
+        ],
+
+        "2023-07-08" : [
+            {"time" : "00:00:00" , "action" : "action 1"}, 
+            {"time" : "00:07:00" , "action" : "action 2"}
+        ]
+    }
+
+} 

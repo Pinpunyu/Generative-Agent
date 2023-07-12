@@ -1,0 +1,67 @@
+{
+    "First name" : "Wolfgang",
+    "Last name" : "Schulz",
+    "Age" : 21,
+    "Innate tendency" : "hardworking, passionate, dedicated",
+    "Learned tendency" : "Wolfgang Schulz is a student at Oak Hill College studying chemistry and a student athlete. He is very dedicated to both his academics and his sport.",
+    "Currently" : "Wolfgang Schulz is training for his next competition and studying for his exams. He is also looking for ways to make his studies more efficient.",
+    "Lifestyle" : "Wolfgang Schulz goes to bed around 9pm, awakes up around 5am, eats dinner around 6pm.",
+    "Plan" : 
+    {
+        "2023-07-07" : {
+            "rough_plan" : [
+                "plan 1" , "plan 2"
+            ],
+
+            "detail_plan" : [
+                
+                {
+                    "plan" : "plan 1" ,
+                    "time" : "4:00"
+                },
+                {
+                    "plan" : "plan 2",
+                    "time" : "4:05"
+                } 
+                
+            ]
+        },
+
+        "2023-07-08" : {
+            "rough_plan" : [
+                "plan 1" , "plan 2"
+            ],
+
+            "detail_plan" : [
+                
+                {
+                    "plan" : "plan 1" ,
+                    "time" : "4:00"
+                },
+                {
+                    "plan" : "plan 2",
+                    "time" : "4:05"
+                } 
+                
+            ]
+        }
+         
+        
+        
+    },
+    "location" : "NUK Town:school:Prof. KCF's lab:computer 2",
+
+    "action" : 
+    {
+        "2023-07-07" : [
+            {"time" : "00:00:00" , "action" : "action 1"}, 
+            {"time" : "00:07:00" , "action" : "action 2"}
+        ],
+
+        "2023-07-08" : [
+            {"time" : "00:00:00" , "action" : "action 1"}, 
+            {"time" : "00:07:00" , "action" : "action 2"}
+        ]
+    }
+
+} 

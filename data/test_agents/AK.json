@@ -1,0 +1,67 @@
+{
+    "First name" : "Ayesha",
+    "Last name" : "Khan",
+    "Age" : 20,
+    "Innate tendency" : "curious, determined, independent",
+    "Learned tendency" : "Ayesha Khan is a college student who loves to explore literature. She is curious and determined to understand the nuances of each work.",
+    "Currently" : "Ayesha Khan is researching for her senior thesis on the use of language in Shakespeare's plays. She is also taking classes to learn more about writing.",
+    "Lifestyle" : "Ayesha Khan goes to bed around 10pm, awakes up around 6am, eats dinner around 5pm.",
+    "Plan" : 
+    {
+        "2023-07-07" : {
+            "rough_plan" : [
+                "plan 1" , "plan 2"
+            ],
+
+            "detail_plan" : [
+                
+                {
+                    "plan" : "plan 1" ,
+                    "time" : "4:00"
+                },
+                {
+                    "plan" : "plan 2",
+                    "time" : "4:05"
+                } 
+                
+            ]
+        },
+
+        "2023-07-08" : {
+            "rough_plan" : [
+                "plan 1" , "plan 2"
+            ],
+
+            "detail_plan" : [
+                
+                {
+                    "plan" : "plan 1" ,
+                    "time" : "4:00"
+                },
+                {
+                    "plan" : "plan 2",
+                    "time" : "4:05"
+                } 
+                
+            ]
+        }
+         
+        
+        
+    },
+    "location" : "NUK Town:7-11",
+
+    "action" : 
+    {
+        "2023-07-07" : [
+            {"time" : "00:00:00" , "action" : "action 1"}, 
+            {"time" : "00:07:00" , "action" : "action 2"}
+        ],
+
+        "2023-07-08" : [
+            {"time" : "00:00:00" , "action" : "action 1"}, 
+            {"time" : "00:07:00" , "action" : "action 2"}
+        ]
+    }
+
+} 

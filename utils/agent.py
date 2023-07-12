@@ -44,6 +44,8 @@ class Agent:
         
         while time.time() > plan_time.time():
             self.current_plan_idx += 1
+            plan_time = self.plans[str(time.date())]['detail_plan'][self.current_plan_idx]['time']
+            plan_time = datetime.datetime.strptime(plan_time , '%H:%M')
 
         self.current_action = self.plans[str(time.date())]['detail_plan'][self.current_plan_idx]['plan']
 
@@ -162,8 +164,7 @@ class Agent:
             minute = subplan.split(':')[1].strip(' ')
             action = subplan.split(':')[2]
 
-            plan_time = f"{hour}:{minute[:-2].strip(' ')}" if minute.endswith("am") else f"{hour + 12}:{minute[:-2]}"
-
+            plan_time = f"{hour}:{minute[:-2].strip(' ')}" if minute.endswith("am") else f"{hour + 12}:{minute[:-2].strip(' ')}"
             self.plans[str(time.date())]['detail_plan'].append({
                 "plan" : action,
                 "time" : plan_time
@@ -210,8 +211,9 @@ class Agent:
 
         ### !!! TODO LLM output !!! ###
         reflect = "Klaus Mueller is dedicated to his research on gentrification (because of 1, 2, 8, 15)"
+        reflection = {'observation': reflect, 'type': 0}
 
-        self.update_observation([reflect] , time)
+        self.update_observation([reflection] , time)
     
     
     def __gen_reaction__(self , observation : dict , time : datetime) -> Tuple[bool , str]:
