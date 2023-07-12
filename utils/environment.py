@@ -41,11 +41,17 @@ class tree_node():
         observation = []
         
         if self.state != None:
-            observation.append(f"{self.name} is {self.state}")
+            observation.append({
+                "observation" : (f"{self.name} is {self.state}"),
+                "type" : 0
+            })
         
         
         for agent , action in self.agents.items():
-            observation.append(f"{agent} is {action}")
+            observation.append({
+                "observation" : f"{agent} is {action}",
+                "type" : 1
+            })
 
         return observation
     
@@ -59,7 +65,7 @@ class env_tree():
         # value -> tree_node
         # root  -> root node name
 
-        self.tree = {}
+        self.tree : dict[str , tree_node] = {}
         self.root = None
 
         if json != None:
@@ -179,6 +185,14 @@ class env_tree():
     def remove_agent(self , node:str , agent:str):
         ### remove a agent of the specific node ###
         self.tree[node].remove_agent(agent)
+    
+    def clear_all_agent(self):
+        ### clear all node's agents ###
+        bfs_tree = self.__iter_around_env__(self.root)
+        for node_key in bfs_tree:
+            self.tree[node_key].agents = {}
+
+        return
 
     def visualize(self):
         ### show the env tree ###
@@ -188,7 +202,12 @@ class env_tree():
         value = []
         for node_key in bfs_li:
             parent_li.append(':'.join(node_key.split(':')[:-1]))
-            state.append(f"{node_key.split(':')[-1]} : {self.tree[node_key].state}")
+            info = f"{node_key.split(':')[-1]} : {self.tree[node_key].state}<br>"
+            for agent , action in self.tree[node_key].agents.items():
+                info += f"{agent} : {action}<br>"
+
+            state.append(info)
+
             value.append(1)
 
         # for i in range(0, len(bfs_li)):
@@ -232,7 +251,7 @@ class env_tree():
 
         return traversal_rel
     
-    def observation(self , node:str , observate_factor :tuple[int,int] = (1,10) , place_factor :tuple[int,int] = (2,1)) -> Tuple[list[str] , list[str]]:
+    def observation(self , node:str , observate_factor :tuple[int,int] = (1,10) , place_factor :tuple[int,int] = (2,1)) -> Tuple[list[dict] , list[str]]:
         ### return the observation & place with a node ###
         # give the observation up / down level
         # give the place up / down level
