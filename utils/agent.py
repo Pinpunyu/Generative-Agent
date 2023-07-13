@@ -1,6 +1,7 @@
 from utils.environment import env_tree
 from utils.environment import tree_node
 from utils.retrieval import Retrieval
+from utils.gpt import GPT_react
 import json
 from typing import Union , Tuple
 from pathlib import Path
@@ -137,6 +138,7 @@ class Agent:
             )
         
         ### !!! TODO LLM output !!! ###
+        # plans = GPT_react(prompt)
         plans = "1)sleep at 8:00 am , 2) go to school at 8:30 am"
 
 
